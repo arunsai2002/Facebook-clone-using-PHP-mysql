@@ -15,7 +15,15 @@ header("location:login.php");
 
 //if session is set,it will display the username
 if(isset($_SESSION['message'])){
-    echo "Welcome, " . $_SESSION['message'];
+    echo "Welcome, " . $_SESSION['message']. "<br>"; 
+    $conn = mysqli_connect("localhost","root","","users");
+    $sql = "SELECT `requestfrom` FROM `crud` WHERE `mail`='$_SESSION[message]'";
+    $result = mysqli_query($conn,$sql);
+    if($result){
+        $row = mysqli_fetch_assoc($result);
+        $requestfrom = $row['requestfrom'];
+    }
+    echo "You have a request from:$requestfrom";
    
 }
 
@@ -144,13 +152,19 @@ if(isset($_SESSION['message'])){
 
 <!--query to display posts from database-->
         <?php
-        if($_SESSION['message'] == "arunsainihith03@gmail.com"){
+        if(isset($_SESSION['message'])){
            
            
         
 $conn = mysqli_connect("localhost","root","","users");
+$sql = "SELECT `id` FROM `crud` WHERE `mail`= '$_SESSION[message]'";
+$result = mysqli_query($conn,$sql);
+if($result){
+    $row = mysqli_fetch_assoc($result);
+    $id = $row['id'];
+}
 
-$sql1 = "SELECT `id`,`image`,`likes`,`dislikes`,`comments` FROM `posts`";
+$sql1 = "SELECT `id`,`image`,`likes`,`dislikes`,`comments` FROM `posts` WHERE `userid`='$id'";
 $result1 = mysqli_query($conn,$sql1);
 
  
@@ -176,40 +190,7 @@ echo "<img class=card-img-top src=$row[image] height=500px;>
 
     }
 
-    if($_SESSION['message'] == "arunsainihith47@gmail.com"){
-        
-           
-           
-        
-            $conn = mysqli_connect("localhost","root","","users");
-            
-            $sql1 = "SELECT `id`,`image`,`likes`,`dislikes` FROM `posts1`";
-            $result1 = mysqli_query($conn,$sql1);
-            
-             
-               
-                while($row = mysqli_fetch_assoc($result1)){
-                    //delete the posts
-                    // $id = $_GET['id'];
-                    // $result = mysqli_query($conn, "DELETE FROM `posts1` WHERE id=$id");
-            
-                    
-                
-                
-            echo "<img class=card-img-top src=$row[image] height=500px;>
-            <div class=d-flex justify-content-start>
-                    <button class=btn btn-primary me-2 ><i class=fa fa-thumbs-up></i> <a href=like.php?id=$row[id]>Likes($row[likes])
-               
-                    </a> </button>
-                    <button class=btn btn-primary me-2><i class=bi bi-hand-thumbs-down></i> <a href=dislike.php?id=$row[id]>Dislikes($row[dislikes])</a></button>
-                     <button type=button style=width:100px class=btn btn-primary data-toggle=modal data-target=#exampleModal2>comments</button>
-                    <button class=btn btn-danger me-2 ><i class=bi bi-hand-thumbs-down></i> <a href=?id=$row[id]>Delete</a></button>
-                
-            </div>
-            ";}
-            
-                
-    }
+   
 ?>
 
 
@@ -296,7 +277,7 @@ function showPreview(event) {
 <?php
 if(isset($_POST['submit1'])){
     
-    if($_SESSION['message'] == "arunsainihith03@gmail.com"){
+    if(isset($_SESSION['message'])){
         $conn = mysqli_connect("localhost","root","","users");
 $filename1 = $_FILES["upload1"]["name"];
 $tempname1 = $_FILES["upload1"]["tmp_name"];
@@ -304,8 +285,14 @@ $folder1 = "facebookimages/".$filename1;
 
 
 
+$sql = "SELECT `id` FROM `crud` WHERE `mail`= '$_SESSION[message]'";
+$result = mysqli_query($conn,$sql);
+if($result){
+    $row = mysqli_fetch_assoc($result);
+    $id = $row['id'];
+}
 
-$sql1 = "INSERT INTO `posts`(`image`) VALUES ('$folder1')";
+$sql1 = "INSERT INTO `posts`(`image`,`userid`) VALUES ('$folder1','$id')";
 
 $result1 = mysqli_query($conn,$sql1);
 if($result1){
@@ -314,23 +301,7 @@ move_uploaded_file($tempname1,$folder1);
 }
     }
 
-    if($_SESSION['message'] == "arunsainihith47@gmail.com"){
-        $conn = mysqli_connect("localhost","root","","users");
-        $filename1 = $_FILES["upload1"]["name"];
-        $tempname1 = $_FILES["upload1"]["tmp_name"];
-        $folder1 = "facebookimages/".$filename1;
-        
-        
-        
-        
-        $sql1 = "INSERT INTO `posts1`(`image`) VALUES ('$folder1')";
-        
-        $result1 = mysqli_query($conn,$sql1);
-        if($result1){
-        move_uploaded_file($tempname1,$folder1);
-       
-        }
-    }
+    
 
 
 }
@@ -462,7 +433,7 @@ echo "<img class=card-img-top src=$row[image]>";
         $conn = mysqli_connect("localhost","root","","users");
         $id = $_GET['id'];
         
-        $sql = "UPDATE `crud` SET `request`='1' WHERE `id`=$id";
+        $sql = "UPDATE `crud` SET `request`='1',`requestfrom`='$_SESSION[message]' WHERE `id`=$id";
         $resultrequest = mysqli_query($conn,$sql);
        
        
